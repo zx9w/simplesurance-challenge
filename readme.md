@@ -4,18 +4,18 @@ Using only the standard library, create a Go HTTP server that on each request re
 
 # Todo list
 [X] Read from file
--> [ ] Readlines
+-> [X] Readlines
 [X] Write to file
 -> [X] I only need the datetime stamps in the file.
--> [ ] String builder
+-> [X] String builder
 [X] Answer GET request
 -> [X] Elaborate the structures
 [X] Date and time
 -> [X] Query system time
 -> [X] Write as string
 -> [X] Parse string
-[ ] Put it all together
+[X] Put it all together
 -> [X] Learn how to make functions (^.^)
--> [ ] Write to the top of the file
+-> [X] Write to the top of the file
 
 
