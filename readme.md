@@ -4,9 +4,16 @@ Using only the standard library, create a Go HTTP server that on each request re
 
 # Todo list
 [X] Read from file
-[ ] Write to file
-[ ] Answer GET request
-[ ] Measure time
+[X] Write to file
+-> [ ] Update this logic to CSV to have date info included.
+[X] Answer GET request
+-> [ ] Elaborate the structures
+[ ] Date and time
+-> [ ] Query system
+-> [ ] Write as string
+-> [ ] Parse string
 [ ] Put it all together
+-> [X] Learn how to make functions (^.^)
+-> [ ] Overwrite the file incrementally or some clever diff logic.
+-> [ ] Alternatively always write to the top of the file or read from the bottom.
 
-I have to remember to put timestamps on increments in the file. Overwrite the stuff older than one minute when rewriting.
