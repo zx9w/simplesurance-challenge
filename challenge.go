@@ -7,11 +7,12 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
 	// ------ HTTP ------
-	http.HandleFunc("/", HelloServer)
+	http.HandleFunc("/", SolutionServer)
 	http.ListenAndServe(":8080", nil)
 
 	//*/
@@ -32,6 +33,26 @@ func WriteData(filename string, message []byte) {
 	if Werr != nil {
 		log.Fatal(Werr)
 	}
+}
+
+// ------ HTTP Server ------> Side effects!
+func SolutionServer(w http.ResponseWriter, r *http.Request) {
+	layout := "Mon Jan 2 15:04:05 MST 2006  (MST is GMT-0700)"
+
+	content := ReadData("date.txt")
+	fmt.Printf("Dates:\n %s\n", content)
+
+	t := time.Now()
+	//fmt.Println(t.Format(layout))
+
+	oldt, _ := time.Parse(layout, string(content[:]))
+
+	fmt.Printf("The last call was %v time ago.", t.Sub(oldt))
+
+	fmt.Fprintf(w, "File contents: %s!", content) //r.URL.Path[1:])
+
+	WriteData("date.txt", []byte(t.Format(layout)))
+
 }
 
 // ------ HTTP Server ------> Side effects!
