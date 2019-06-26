@@ -10,13 +10,36 @@ import (
 )
 
 func main() {
-	// ----- Read from file -----
-	content, Rerr := ioutil.ReadFile("data.txt")
+	// ------ HTTP ------
+	http.HandleFunc("/", HelloServer)
+	http.ListenAndServe(":8080", nil)
+
+	//*/
+}
+
+// ----- Read from file -----> Side effects!
+func ReadData(filename string) []byte {
+	content, Rerr := ioutil.ReadFile(filename)
 	if Rerr != nil {
 		log.Fatal(Rerr)
 	}
+	return content
+}
 
+// ------ Write to file ------> Side effects!
+func WriteData(filename string, message []byte) {
+	Werr := ioutil.WriteFile(filename, message, 0644)
+	if Werr != nil {
+		log.Fatal(Werr)
+	}
+}
+
+// ------ HTTP Server ------> Side effects!
+func HelloServer(w http.ResponseWriter, r *http.Request) {
+	content := ReadData("data.txt")
 	fmt.Printf("File contents: %s\n", content)
+
+	fmt.Fprintf(w, "File contents: %s!", content) //r.URL.Path[1:])
 
 	// ------ Type conversions ----
 	i, Cerr := strconv.ParseInt(strings.TrimSpace(string(content[:])), 10, 64)
@@ -25,20 +48,8 @@ func main() {
 	}
 
 	message := []byte(strconv.FormatInt(i+1, 10))
+	// ============================
 
-	// ------ Write to file ------
-	Werr := ioutil.WriteFile("data.txt", message, 0644)
-	if Werr != nil {
-		log.Fatal(Werr)
-	}
+	WriteData("data.txt", message)
 
-	// ------ HTTP ------
-	http.HandleFunc("/", HelloServer)
-	http.ListenAndServe(":8080", nil)
-
-	//*/
-}
-
-func HelloServer(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %s!", r.URL.Path[1:])
 }

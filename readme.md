@@ -5,11 +5,11 @@ Using only the standard library, create a Go HTTP server that on each request re
 # Todo list
 [X] Read from file
 [X] Write to file
--> [ ] Update this logic to CSV to have date info included.
+-> [ ] I only need the datetime stamps in the file.
 [X] Answer GET request
--> [ ] Elaborate the structures
+-> [X] Elaborate the structures
 [ ] Date and time
--> [ ] Query system
+-> [ ] Query system time
 -> [ ] Write as string
 -> [ ] Parse string
 [ ] Put it all together
