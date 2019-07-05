@@ -7,17 +7,36 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"testing"
 	"time"
+	// TODO: Stress tests and accuracy tests
 )
 
+func TestServer(*testing.T) {
+
+}
+
+func BenchmarkServer(*testing.B) {
+
+}
+
 func main() {
+	// These functions are the entrypoint
 	http.HandleFunc("/", SolutionServer)
 	http.ListenAndServe(":8080", nil)
+
+	// TODO: Read how to have them update a datastructure I can listen to here.
+
+	// TODO: Async thread that has access to same datastructure (read only).
+
+	// TODO: Efficient writing to file when datastructure meets predicate.
+	// ----> This means figuring out the correct predicate
+	// ----> Best datastructure (see issue on time layout)
+	// ----> ----> Indexed Queue (scheduler)
+	// ----> Parsing and Writing
 }
 
 func ReadData(filename string) []byte {
-	// We won't worry about the file being too big
-	// since it only contains 60 seconds of requests
 	content, Rerr := ioutil.ReadFile(filename)
 	if Rerr != nil {
 		log.Fatal(Rerr)
@@ -33,6 +52,9 @@ func WriteData(filename string, message []byte) {
 }
 
 func SolutionServer(w http.ResponseWriter, r *http.Request) {
+	// TODO: Study how I can make layout more efficient, better precision.
+	// ----> This means solving for what information needs to be kept.
+	// ----> Finding the notation to express that intent.
 	layout := "Mon Jan 2 15:04:05 MST 2006  (MST is GMT-0700)"
 
 	content := ReadData("date.txt")

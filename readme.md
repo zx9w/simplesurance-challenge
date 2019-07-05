@@ -2,34 +2,65 @@
 
 Using only the standard library, create a Go HTTP server that on each request responds with a counter of the total number of requests that it has received during the previous 60 seconds (moving window). The server should continue to the return the correct numbers after restarting it, by persisting data to a file.
 
+## Refinement of requirements
+
+The server must be race-condition free and able to handle multiple requests.
+
+The server should be efficient when interacting with the filesystem.
+
+Precision should not be compromised.
+
+There should be proper tests in place to make sure that these conditions hold.
+
+## Architecture
+
+The pipeline of data looks like this:
+```
+......... f    ..........   g   ........  h  .........
+Server --writes to---> datastructure -writes to-> file
+       \_concurrent_/
+```
+Constraints:
+
+- f:  can only append to queue
+- g:  is an endomorphism that keeps old data outside
+- h1: has read only access to queue
+- h2: writes efficiently to file
+
+h = h2 . h1
+
+Procrastinating a little bit, made a better picture :)
+```
+--- Server Thread ---
+| 1 | 2 | 3 | 4 | 5 |  :: f
+\   \   \   /   /   /
+.\   \   \ /   /   /.
++>\ Datastructure°/..  :: g
+|..\|||||||||||../...  :: h1
+|.. Write Logic ----+  :: h2
++-on start-- File <-+
+```
 # Todo list
 
-[X] Read from file
+[ ] Write tests
+-> [ ] Accuracy: time, free of raceconditions
+-> [ ] Stress: generate concurrent events
 
--> [X] Readlines
+[ ] Datastructure
+-> [ ] Implement: Queue w/ metadata (counter)
+---> [ ] Use opportunity to learn about schedulers
+-> [ ] Writing to string: toString puts newest date at top 
+-> [ ] Reading from file: readFile reads until 1 minute ago
+-> [ ] Parsing from text: constructor builds counter
 
-[X] Write to file
+[ ] Update a datastructure
+-> [ ] Asynchronously: Add things to que
+-> [ ] Globally: Research
+-> [ ] Concurrent access: Read vs Write
 
--> [X] I only need the datetime stamps in the file.
-
--> [X] String builder
-
-[X] Answer GET request
-
--> [X] Elaborate the structures
-
-[X] Date and time
-
--> [X] Query system time
-
--> [X] Write as string
-
--> [X] Parse string
-
-[X] Put it all together
-
--> [X] Learn how to make functions (^.^)
-
--> [X] Write to the top of the file
+[ ] Improve time layout
+-> [ ] Precision: Find out how much I can have
+-> [ ] Efficiency: Find out how much it costs
+-> [ ] Notation: Find out how to communicate it
 
 
