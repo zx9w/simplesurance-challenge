@@ -29,13 +29,13 @@ func Funnel(q *list.List, reqs <-chan time.Time, l string, write1, write2 chan<-
 			write2 <- mkByte(timestamp, l)
 
 			que.PushFront(timestamp)
-			for e := que.Back(); e != nil && (e.Value).Add(1*time.Minute).Before(timestamp); e = e.Prev() {
+			for e := que.Back(); e != nil && e.Value.(time.Time).Add(1*time.Minute).Before(timestamp); e = e.Prev() {
 				que.Remove(e)
 				e = que.Back()
 			}
 		default: // nothing to write
 			ele := que.Back()
-			for ele.Value.Add(1 * time.Minute).Before(time.Now()) {
+			for ele.Value.(time.Time).Add(1 * time.Minute).Before(time.Now()) {
 				que.Remove(ele)
 				ele = que.Back()
 			}
