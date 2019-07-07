@@ -169,9 +169,6 @@ func WriteData(filename string, message []byte) {
 }
 
 func Solution(store chan<- time.Time, q *list.List) func(w http.ResponseWriter, r *http.Request) {
-
-	log.Printf("I was here 1")
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Requests in past 60 seconds: %s", strconv.Itoa((*q).Len()+1))
 		store <- time.Now()
