@@ -21,7 +21,6 @@ func mkByte(t time.Time, layout string) []byte { // FIXME
 
 func Funnel(q *list.List, reqs <-chan time.Time, l string, write1, write2 chan<- []byte) {
 	que := *q
-	var ele time.Time
 	for {
 		select {
 		case timestamp := <-reqs:
@@ -30,14 +29,13 @@ func Funnel(q *list.List, reqs <-chan time.Time, l string, write1, write2 chan<-
 			write2 <- mkByte(timestamp, l)
 
 			que.PushFront(timestamp)
-			ele = que.Back()
-			for ele.Add(1 * time.Minute).Before(timestamp) {
-				que.Remove(ele)
-				ele = que.Back()
+			for e := que.Back(); e != nil && (e.Value).Add(1*time.Minute).Before(timestamp); e = e.Prev() {
+				que.Remove(e)
+				e = que.Back()
 			}
 		default: // nothing to write
-			ele = que.Back()
-			for ele.Add(1 * time.Minute).Before(time.Now()) {
+			ele := que.Back()
+			for ele.Value.Add(1 * time.Minute).Before(time.Now()) {
 				que.Remove(ele)
 				ele = que.Back()
 			}
@@ -114,21 +112,23 @@ func Init(que *list.List, layout string) {
 	scan1 := bufio.NewScanner(data1)
 	scan2 := bufio.NewScanner(data2)
 
+	var l1, l2 time.Time
 	if scan1.Scan() {
-		l1, _ := time.Parse(layout, scan1.Text())
+		l1, _ = time.Parse(layout, scan1.Text())
 	} else {
-		l1 := time.Now()
+		l1 = time.Now()
 	}
 	if scan2.Scan() {
-		l2, _ := time.Parse(layout, scan2.Text())
+		l2, _ = time.Parse(layout, scan2.Text())
 	} else {
-		l2 := time.Now()
+		l2 = time.Now()
 	}
 
+	var scan *bufio.Scanner
 	if l1.Before(l2) {
-		scan := bufio.NewScanner(data1)
+		scan = bufio.NewScanner(data1)
 	} else {
-		scan := bufio.NewScanner(data2)
+		scan = bufio.NewScanner(data2)
 	}
 
 	nowt := time.Now()
@@ -148,17 +148,17 @@ func main() {
 	layout := "Mon Jan 2 15:04:05 MST 2006  (MST is GMT-0700)"
 	queue := list.New()
 
-	Init(&queue, layout)
+	Init(queue, layout)
 
 	reqs := make(chan time.Time, 300) // sends reqs to funnel
 	write2 := make(chan []byte, 300)  // writes to data2.txt
 	write1 := make(chan []byte, 300)  // data1.txt
 
-	go Funnel(&queue, reqs, layout, write1, write2)
-	go Clean(layout, write1, write2)
+	go Funnel(queue, reqs, layout, write1, write2)
+	go Clean(write1, write2)
 
 	// These functions are the entrypoint
-	http.HandleFunc("/", Solution(reqs, &queue))
+	http.HandleFunc("/", Solution(reqs, queue))
 	http.ListenAndServe(":8080", nil)
 
 }
@@ -170,7 +170,7 @@ func WriteData(filename string, message []byte) {
 	}
 }
 
-func Solution(store chan<- time.Time, q *list.List) func() {
+func Solution(store chan<- time.Time, q *list.List) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Requests in past 60 seconds: %s", strconv.Itoa((*q).Len()+1))
 		store <- time.Now()
