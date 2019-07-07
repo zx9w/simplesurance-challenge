@@ -34,10 +34,8 @@ func Funnel(q *list.List, reqs <-chan time.Time, l string, write1, write2 chan<-
 				e = que.Back()
 			}
 		default: // nothing to write
-			ele := que.Back()
-			for ele.Value.(time.Time).Add(1 * time.Minute).Before(time.Now()) {
-				que.Remove(ele)
-				ele = que.Back()
+			for e := que.Back(); e != nil && e.Value.(time.Time).Add(1*time.Minute).Before(time.Now()); e = e.Prev() {
+				que.Remove(e)
 			}
 			// consider sleeping for some nanoseconds
 		}
@@ -106,6 +104,7 @@ func Init(que *list.List, layout string) {
 		log.Fatal(err1)
 		log.Fatal(err2)
 	}
+
 	defer data1.Close()
 	defer data2.Close()
 
@@ -160,7 +159,6 @@ func main() {
 	// These functions are the entrypoint
 	http.HandleFunc("/", Solution(reqs, queue))
 	http.ListenAndServe(":8080", nil)
-
 }
 
 func WriteData(filename string, message []byte) {
@@ -171,6 +169,9 @@ func WriteData(filename string, message []byte) {
 }
 
 func Solution(store chan<- time.Time, q *list.List) func(w http.ResponseWriter, r *http.Request) {
+
+	log.Printf("I was here 1")
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Requests in past 60 seconds: %s", strconv.Itoa((*q).Len()+1))
 		store <- time.Now()
