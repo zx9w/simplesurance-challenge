@@ -19,7 +19,13 @@ import (
 // FIXME
 const layout = "Mon Jan 2 15:04:05 MST 2006  (MST is GMT-0700)"
 
-var queue *list.List // Making this global, it is only mutated by Init and Funnel.
+// The fact that this is global makes this a poor solution.
+// It is only mutated by Init and Funnel which are mutually exclusive but
+// There will be concurrent calls to queue.Len() which should be O(1) and
+// Read only but I don't know if there will be interferance, if so I may need
+// another channel to send values back along.
+// In that case the queue can be defined in main.
+var queue *list.List
 
 func wait(rtn chan<- bool, millisecs int) {
 	for {
@@ -84,7 +90,6 @@ func stopw(stop chan<- bool, resp <-chan bool) bool {
 
 func Clean(kill chan bool, write1, write2 chan []byte) {
 	clean := make(chan bool)
-	okay := make(chan bool)
 
 	stop2 := make(chan bool)
 	stop1 := make(chan bool)
@@ -93,14 +98,12 @@ func Clean(kill chan bool, write1, write2 chan []byte) {
 	resp1 := make(chan bool)
 
 	go wait(clean, 31000) // I keep data around for 62 seconds.
-	go wait(okay, 5000)   // Redundant.
 
 	go Write("data1.txt", write1, stop1, resp1) // true
 	go Write("data2.txt", write2, stop2, resp2) // false
 
 	alive := true
 	overwrite := false
-	save := false
 
 	for alive {
 		select {
@@ -120,20 +123,6 @@ func Clean(kill chan bool, write1, write2 chan []byte) {
 				}
 			}
 			overwrite = !overwrite
-		case <-okay:
-			if save {
-				if stopw(stop1, resp1) {
-					log.Printf("Restarted writer 1")
-					go Write("data1.txt", write1, stop1, resp1)
-				}
-				save = !save
-			} else {
-				if stopw(stop2, resp2) {
-					log.Printf("Restarted writer 2")
-					go Write("data2.txt", write2, stop2, resp2)
-				}
-				save = !save
-			}
 		case <-kill:
 			if stopw(stop1, resp1) && stopw(stop2, resp2) {
 				log.Printf("Success~!")
