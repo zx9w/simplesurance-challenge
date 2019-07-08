@@ -54,12 +54,17 @@ The user is asking at the granularity of second so the answer is approximately c
 # Todo list
 
 [ ] Write tests
+
 -> [ ] Accuracy: time, free of raceconditions
+
 -> [ ] Stress: generate concurrent events
 
 [ ] Improve time layout
+
 -> [ ] Precision: Find out how much I can have
+
 -> [ ] Efficiency: Find out how much it costs
+
 -> [ ] Notation: Find out how to communicate it
 
 
