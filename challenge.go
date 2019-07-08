@@ -20,17 +20,17 @@ const layout = "Mon Jan 2 15:04:05 MST 2006  (MST is GMT-0700)"
 
 var queue *list.List
 
-func wait(rtn chan<- bool, secs int) {
+func wait(rtn chan<- bool, millisecs int) {
 	for {
-		time.Sleep(time.Duration(secs) * time.Second)
+		time.Sleep(time.Duration(millisecs*1000000) * time.Nanosecond)
 		rtn <- true
 	}
 }
 
 func Funnel(reqs <-chan time.Time, write1, write2 chan<- []byte) {
-	okay := make(chan bool)
+	clear := make(chan bool)
 
-	go wait(okay, 1)
+	go wait(clear, 500) // twice a second
 
 	for {
 		select {
@@ -40,11 +40,10 @@ func Funnel(reqs <-chan time.Time, write1, write2 chan<- []byte) {
 			write1 <- []byte(timestamp.Format(layout) + "\n")
 			write2 <- []byte(timestamp.Format(layout) + "\n")
 
-		case <-okay:
+		case <-clear:
 			for e := queue.Back(); e != nil; e = e.Prev() {
 				oldt, safe := e.Value.(time.Time)
 				if safe && oldt.Add(1*time.Minute).Before(time.Now()) {
-					log.Printf("Removed# " + oldt.Format(layout))
 					queue.Remove(e)
 				}
 			}
@@ -92,8 +91,8 @@ func Clean(kill chan bool, write1, write2 chan []byte) {
 	resp2 := make(chan bool)
 	resp1 := make(chan bool)
 
-	go wait(clean, 65)
-	go wait(okay, 5)
+	go wait(clean, 65000) // technically 31 seconds would be plenty.
+	go wait(okay, 5000)   // If I get the Ctrl+C to work this will be redundant.
 
 	go Write("data1.txt", write1, stop1, resp1) // true
 	go Write("data2.txt", write2, stop2, resp2) // false
