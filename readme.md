@@ -4,13 +4,13 @@ Using only the standard library, create a Go HTTP server that on each request re
 
 ## Refinement of requirements
 
-The server must be race-condition free and able to handle multiple requests.
+[X] The server must be race-condition free and able to handle multiple requests.
 
-The server should be efficient when interacting with the filesystem.
+[X] The server should be efficient when interacting with the filesystem.
 
-Precision should not be compromised.
+[ ] Precision should not be compromised.
 
-There should be proper tests in place to make sure that these conditions hold.
+[ ] There should be proper tests in place to make sure that these conditions hold.
 
 ## Architecture
 
