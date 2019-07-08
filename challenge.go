@@ -114,7 +114,6 @@ func Clean(kill chan bool, write1, write2 chan []byte) {
 					WriteData("data1.txt", nil)
 					go Write("data1.txt", write1, stop1, resp1)
 				}
-				overwrite = !overwrite
 			} else {
 				if stopw(stop2, resp2) {
 					log.Printf("Clearing data2.txt")

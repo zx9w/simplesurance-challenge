@@ -50,6 +50,17 @@ However I can only use the standard library and they don't offer a good queue so
 
 The user is asking at the granularity of second so the answer is approximately correct for this granularity.
 
+## Implementation
+
+The actual implementation writes to two files and clears one of them every half minute, this is to avoid blocking, but since the write channel is buffered it's not really a problem if the writer blocks..
+
+Another quirk of the implementation is that the datastructure clears out old timestamps twice a second. There's a number of problems with this approach.
+
+The worst hack is making the queue variable global, I wanted to have direct read access from the handler threads but probably a better solution is just to use a buffered channel again and have the queue be owned by the funnel.
+
+Overall I think the solution is quite good though, if it just had tests and if I refactored it to take advantage of some of the lessons learned along the way, then I'd be pretty happy. However, refining this thing any further is not really a good use of my time at this moment. Maybe I'll come back to it in a few days.
+
+I didn't look further into the timestamp layout, I'm sure that could be improved as well.
 
 # Todo list
 
@@ -57,7 +68,7 @@ The user is asking at the granularity of second so the answer is approximately c
 
 -> [ ] Accuracy: time, free of raceconditions
 
--> [ ] Stress: generate concurrent events
+-> [X] Stress: generate concurrent events
 
 [ ] Improve time layout
 
