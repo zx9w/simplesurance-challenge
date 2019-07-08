@@ -16,9 +16,10 @@ import (
 	"time"
 )
 
+// FIXME
 const layout = "Mon Jan 2 15:04:05 MST 2006  (MST is GMT-0700)"
 
-var queue *list.List
+var queue *list.List // Making this global, it is only mutated by Init and Funnel.
 
 func wait(rtn chan<- bool, millisecs int) {
 	for {
@@ -91,8 +92,8 @@ func Clean(kill chan bool, write1, write2 chan []byte) {
 	resp2 := make(chan bool)
 	resp1 := make(chan bool)
 
-	go wait(clean, 65000) // technically 31 seconds would be plenty.
-	go wait(okay, 5000)   // If I get the Ctrl+C to work this will be redundant.
+	go wait(clean, 31000) // I keep data around for 62 seconds.
+	go wait(okay, 5000)   // Redundant.
 
 	go Write("data1.txt", write1, stop1, resp1) // true
 	go Write("data2.txt", write2, stop2, resp2) // false
@@ -198,18 +199,22 @@ func main() {
 	go Funnel(reqs, write1, write2)
 	go Clean(kill, write1, write2)
 
+	// Don't exit until Ctrl+C
+	cmd := make(chan os.Signal, 10)
+	signal.Notify(cmd, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(cmd, os.Interrupt, syscall.SIGINT)
+
+	go func() {
+		log.Printf("Received %s", <-cmd)
+		kill <- true
+		<-kill
+		log.Printf("Exiting gracefully.")
+		os.Exit(1)
+	}()
+
 	// These functions are the entrypoint
 	http.HandleFunc("/", Solution(reqs))
 	http.ListenAndServe(":8082", nil)
-
-	// Don't exit until Ctrl+C
-	cmd := make(chan os.Signal, 1)
-	signal.Notify(cmd, os.Interrupt, syscall.SIGINT)
-
-	log.Printf("Received %s", <-cmd)
-	log.Printf("Exiting gracefully.")
-	kill <- true
-	<-kill
 }
 
 func WriteData(filename string, message []byte) {
