@@ -40,23 +40,22 @@ Procrastinating a little bit, made a better picture :)
 |.. Write Logic ----+  :: h2
 +-on start-- File <-+
 ```
+## Philosophy
+
+I decided to use a FIFO queue instead of PriorityQueue because it's easier and faster but there is the possibility of there being some jitter (where timestamps that are very close to each other get swapped, i.e. put in inverse order).
+
+This means that I prioritized throughput over precision.
+
+However I can only use the standard library and they don't offer a good queue so the throughput is somewhat dampened by that.
+
+The user is asking at the granularity of second so the answer is approximately correct for this granularity.
+
+
 # Todo list
 
 [ ] Write tests
 -> [ ] Accuracy: time, free of raceconditions
 -> [ ] Stress: generate concurrent events
-
-[ ] Datastructure
--> [ ] Implement: Queue w/ metadata (counter)
----> [ ] Use opportunity to learn about schedulers
--> [ ] Writing to string: toString puts newest date at top 
--> [ ] Reading from file: readFile reads until 1 minute ago
--> [ ] Parsing from text: constructor builds counter
-
-[ ] Update a datastructure
--> [ ] Asynchronously: Add things to que
--> [ ] Globally: Research
--> [ ] Concurrent access: Read vs Write
 
 [ ] Improve time layout
 -> [ ] Precision: Find out how much I can have
