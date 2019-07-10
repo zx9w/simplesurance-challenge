@@ -97,7 +97,7 @@ func Clean(kill chan bool, write1, write2 chan []byte) {
 	resp2 := make(chan bool)
 	resp1 := make(chan bool)
 
-	go wait(clean, 31000) // I keep data around for 62 seconds.
+	go wait(clean, 61000) // I keep data around for a minimum of 61 seconds.
 
 	go Write("data1.txt", write1, stop1, resp1) // true
 	go Write("data2.txt", write2, stop2, resp2) // false
